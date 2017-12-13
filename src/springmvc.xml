@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    	http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx.xsd 
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+		
+	<!-- 配置自动扫描的包 -->
+    <context:component-scan base-package="com.home.controller"></context:component-scan>
+    
+     <!-- 设置默认配置方案 -->
+    <mvc:annotation-driven/>
+    <!-- 使用默认的Servlet来响应静态文件 -->
+    <mvc:default-servlet-handler/>
+    
+ 
+    
+     <!-- 视图解析器  -->
+     <bean id="viewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+        <!-- 前缀 -->
+        <property name="prefix">
+            <value>/WEB-INF/jsp/</value>
+        </property>
+        <!-- 后缀 -->
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+        
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+        <property name="url" value="jdbc:oracle:thin:@192.168.16.229:1521:xposp" />
+        <property name="username" value="xposp" />
+        <property name="password" value="xposp" />
+       <property name="validationQuery">
+			<value>select 1 from dual</value>
+		</property>
+		<property name="testWhileIdle">
+			<value>true</value>
+		</property>
+		<property name="testOnReturn">
+			<value>true</value>
+		</property>
+		<property name="testOnBorrow">
+			<value>true</value>
+		</property>
+
+		<!-- Connection Pooling Info -->
+		<property name="maxActive" value="150" />
+		<property name="maxIdle" value="30" />
+		<property name="defaultAutoCommit" value="true" />
+		<!-- 连接Idle一个小时后超时 -->
+		<property name="timeBetweenEvictionRunsMillis" value="3600000" />
+		<property name="minEvictableIdleTimeMillis" value="3600000" />
+	</bean>
+         
+<!--     <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean" lazy-init="false"> -->
+<!--         注入datasource，给sessionfactoryBean内setdatasource提供数据源 -->
+<!--         <property name="dataSource" ref="dataSource" /> -->
+<!--         <property name="configLocation" value="classpath:hibernate.cfg.xml"></property> -->
+<!--         //加载实体类的映射文件位置及名称 -->
+<!--         <property name="mappingLocations" value="classpath:*.hbm.xml"></property> -->
+<!--     </bean>   -->
+    
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+    	<property name="dataSource" ref="dataSource" />
+    	<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.autoReconnect">true</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.OracleDialect</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.use_outer_join">false</prop>
+				<prop key="hibernate.query.substitutions">true=1, false=0</prop>
+				<!-- <prop key="hibernate.connection.isolation">2</prop> -->
+			</props>
+		</property>
+		<property name="annotatedClasses">
+			<list>
+				
+			</list>
+		</property>
+    </bean>
+	
+	<!-- 事务配置 -->
+<!-- 	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />-->
+
+<!--     配置Spring声明式事务 -->
+<!--     <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"> -->
+<!--         <property name="sessionFactory" ref="sessionFactory"></property> -->
+<!--     </bean>   -->
+    
+<!--     配置事务事务属性 -->
+<!--     <tx:advice id="txAdvice" transaction-manager="transactionManager"> -->
+<!--         <tx:attributes> -->
+<!--             <tx:method name="get*" read-only="true"/> -->
+<!--             <tx:method name="*"/> -->
+<!--         </tx:attributes> -->
+<!--     </tx:advice> -->
+<!--     配置事务切点，并把切点和事务属性关联起来 -->
+<!--     <aop:config> -->
+<!--         <aop:pointcut expression="execution(* com.jackie.springmvc.handlers.Dao.impl.*(..))" id="txPointcut"/> -->
+<!--         <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/> -->
+<!--     </aop:config> -->
+
+
+        
+   
+	
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">  
+		<property name="sessionFactory" ref="sessionFactory"/>  
+	</bean>  
+
+<!-- 	<bean id="bookDao" class="com.jackie.springmvc.handlers.book.dao.impl.BookDaoImpl">   -->
+<!-- 		<property name="hibernateTemplate" ref="hibernateTemplate" />   -->
+<!-- 	</bean> -->
+<!-- 	<bean id="bookService" class="com.jackie.springmvc.handlers.Service.impl.BookServiceImpl">   -->
+<!-- 		<property name="bookDao" ref="bookDao" />   -->
+<!-- 	</bean> -->
+<!-- 	<bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/> -->
+</beans>
